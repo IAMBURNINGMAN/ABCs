@@ -1,25 +1,49 @@
 package main
 
 import (
+	"log"
 	"net/http"
 	"sync"
 
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
+	"gorm.io/driver/postgres"
+	"gorm.io/gorm"
 )
 
 type Task struct {
 	Task      string `json:"task"`
-	ID        string `json:"id"`
+	ID        string `gorm:"primaryKey" json:"id"`
 	Completed string `json:"completed"`
 }
 
 var (
+	db *gorm.DB
 	mu sync.RWMutex
 )
 
-var TASKLIST = []Task{}
+func initDB() {
+
+	dsn := "host=localhost user=postgres password=eourpassword dbname=postgres port=5432 sslmode=disable"
+	var err error
+	db, err = gorm.Open(postgres.Open(dsn), &gorm.Config{})
+	if err != nil {
+		log.Fatalf("Failed to connect to database: %v", err)
+	}
+	if err := db.AutoMigrate(&Task{}); err != nil {
+		log.Fatalf("Failed to migrate tasks: %v", err)
+	}
+}
+
+func GetHandler(c echo.Context) error {
+	tasks := []Task{}
+
+	if err := db.Find(&tasks).Error; err != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Failed to get tasks from database"})
+	}
+	return c.JSON(http.StatusOK, tasks)
+}
 
 func PostHandler(c echo.Context) error {
 	var req Task
@@ -29,7 +53,9 @@ func PostHandler(c echo.Context) error {
 	}
 	mu.Lock()
 	task := Task{req.Task, uuid.NewString(), req.Completed}
-	TASKLIST = append(TASKLIST, task)
+	if err := db.Create(&task).Error; err != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Failed to create task to database"})
+	}
 	mu.Unlock()
 	return c.JSON(http.StatusOK, Task{Task: req.Task, ID: req.ID, Completed: req.Completed})
 }
@@ -41,49 +67,39 @@ func PatchHandler(c echo.Context) error {
 		c.Logger().Errorf("bind error: %v", err)
 		return c.JSON(http.StatusBadRequest, map[string]string{"error": "bind error"})
 	}
-	for i, tasking := range TASKLIST {
-		if tasking.ID == idpatcher {
-			TASKLIST[i].Completed = req.Completed
-			TASKLIST[i].Task = req.Task
-			return c.JSON(http.StatusOK, TASKLIST[i])
-		}
-	}
-	return c.JSON(http.StatusBadRequest, map[string]string{"error": "Task not found"})
-}
 
-func GetHandler(c echo.Context) error {
-	if len(TASKLIST) == 0 {
-		return c.JSON(http.StatusNotFound, map[string]string{"error": "no task set"})
+	var task Task
+	if err := db.First(&task, "id = ?", idpatcher).Error; err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]string{"error": "Could not find  this task to patch"})
 	}
-	mu.RLock()
-	t := TASKLIST[0]
-	mu.RUnlock()
-	if len(TASKLIST) == 0 {
-		return c.JSON(http.StatusNotFound, map[string]string{"error": "no task set"})
+
+	task.Task = req.Task
+	task.Completed = req.Completed
+	if err := db.Save(&task).Error; err != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Failed to patch task to database"})
 	}
-	return c.JSON(http.StatusOK, t)
+	return c.JSON(http.StatusOK, task)
 }
 
 func deleteHandler(c echo.Context) error {
 	id := c.Param("id")
-	for i, t := range TASKLIST {
-		if t.ID == id {
-			TASKLIST = append(TASKLIST[:i], TASKLIST[i+1:]...)
-			return c.NoContent(http.StatusNoContent)
-		}
+
+	if err := db.Delete(&Task{}, "id = ?", id).Error; err != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Failed to delete task from database"})
 	}
-	return c.JSON(http.StatusNotFound, map[string]string{"error": "Task not found"})
+	return c.JSON(http.StatusNoContent, nil)
 }
 
 func main() {
+	initDB()
 	e := echo.New()
 	e.Use(middleware.Logger())
 	e.Use(middleware.Recover())
 
-	e.GET("/task", GetHandler)
-	e.POST("/task", PostHandler)
-	e.PATCH("/task/:id", PatchHandler)
-	e.DELETE("/task/:id", deleteHandler)
+	e.GET("/tasks", GetHandler)
+	e.POST("/tasks", PostHandler)
+	e.PATCH("/tasks/:id", PatchHandler)
+	e.DELETE("/tasks/:id", deleteHandler)
 
 	e.Logger.Fatal(e.Start(":8080"))
 }
