@@ -25,22 +25,32 @@ func (h *TaskHandler) GetHandler(c echo.Context) error {
 
 func (h *TaskHandler) PostHandler(c echo.Context) error {
 	var req TaskService.Task
-	tasking, err := h.service.CreateTask(req)
-	if err != nil {
-		return c.JSON(http.StatusBadRequest, map[string]string{"error": "Could not create task"})
+	if err := c.Bind(&req); err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]string{"error": "invalid request body"})
 	}
-	return c.JSON(http.StatusOK, tasking)
+	// Дополнительно: простая валидация (пример)
+	if req.Task == "" {
+		return c.JSON(http.StatusBadRequest, map[string]string{"error": "title is required"})
+	}
+
+	created, err := h.service.CreateTask(req)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "could not create task"})
+	}
+	return c.JSON(http.StatusCreated, created)
 }
 
 func (h *TaskHandler) PatchHandler(c echo.Context) error {
-	idpatcher := c.Param("id")
+	id := c.Param("id")
 	var req TaskService.Task
-
-	updatedtask, err := h.service.UpdateTask(idpatcher, req)
-	if err != nil {
-		return c.JSON(http.StatusBadRequest, map[string]string{"error": "Could not update task"})
+	if err := c.Bind(&req); err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]string{"error": "invalid request body"})
 	}
-	return c.JSON(http.StatusOK, updatedtask)
+	updated, err := h.service.UpdateTask(id, req)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "could not update task"})
+	}
+	return c.JSON(http.StatusOK, updated)
 }
 
 func (h *TaskHandler) DeleteHandler(c echo.Context) error {
