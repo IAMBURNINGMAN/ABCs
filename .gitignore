@@ -1,0 +1,71 @@
+# Binaries and build artifacts
+/bin/
+/build/
+/dist/
+/out/
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+
+# Go specific
+*.test
+*.prof
+coverage.out
+coverage.html
+
+# Module cache (optional — обычно не нужно)
+GOMODCACHE/
+
+# Vendor (если вы не коммитите vendor/ в репозиторий)
+vendor/
+
+# Generated files (Swagger, proto, mockgen etc.)
+**/generated/
+**/gen/
+*.pb.go
+*.pb.gw.go
+swagger.json
+swagger.yaml
+
+# Config, secrets, keys
+.env
+.env.*
+.env.local
+*.key
+*.pem
+*.crt
+certs/
+secrets/
+
+# Logs
+*.log
+logs/
+
+# IDEs and editors
+.vscode/
+.idea/
+*.iml
+*.sublime-workspace
+*.sublime-project
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Temporary and swap files
+*.swp
+*.swo
+*.tmp
+
+# Tooling / local tool caches
+/.gopath/
+/bin/*
+
+# Ignore local Docker compose override (if you use docker-compose.override.yml locally)
+docker-compose.override.yml
+
+# Misc
+coverage/
+tmp/
