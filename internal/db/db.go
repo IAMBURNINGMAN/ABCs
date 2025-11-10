@@ -7,15 +7,17 @@ import (
 	"gorm.io/gorm"
 )
 
-var db *gorm.DB
-
 func InitDB() (*gorm.DB, error) {
+	// Исправлена опечатка в пароле: eourpassword -> yourpassword
+	dsn := "host=localhost user=postgres password=yourpassword dbname=postgres port=5432 sslmode=disable"
 
-	dsn := "host=localhost user=postgres password=eourpassword dbname=postgres port=5432 sslmode=disable"
 	var err error
-	db, err = gorm.Open(postgres.Open(dsn), &gorm.Config{})
+	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
 	if err != nil {
-		log.Fatalf("Failed to connect to database: %v", err)
+		log.Printf("Failed to connect to database: %v", err)
+		return nil, err
 	}
+
+	log.Println("Database connected successfully!")
 	return db, nil
 }
