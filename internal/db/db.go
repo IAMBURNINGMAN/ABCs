@@ -8,7 +8,7 @@ import (
 )
 
 func InitDB() (*gorm.DB, error) {
-	// Исправлена опечатка в пароле: eourpassword -> yourpassword
+	// Исправлена опечатка в пароле
 	dsn := "host=localhost user=postgres password=yourpassword dbname=postgres port=5432 sslmode=disable"
 
 	var err error

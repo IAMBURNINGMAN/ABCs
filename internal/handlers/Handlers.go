@@ -3,6 +3,7 @@ package handlers
 import (
 	"Basic/internal/TaskService"
 	"net/http"
+	"strconv"
 
 	"github.com/labstack/echo/v4"
 )
@@ -28,8 +29,8 @@ func (h *TaskHandler) PostHandler(c echo.Context) error {
 	if err := c.Bind(&req); err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]string{"error": "invalid request body"})
 	}
-	// Дополнительно: простая валидация (пример)
-	if req.Task == "" {
+
+	if req.Title == "" {
 		return c.JSON(http.StatusBadRequest, map[string]string{"error": "title is required"})
 	}
 
@@ -41,12 +42,18 @@ func (h *TaskHandler) PostHandler(c echo.Context) error {
 }
 
 func (h *TaskHandler) PatchHandler(c echo.Context) error {
-	id := c.Param("id")
+	idParam := c.Param("id")
+	id, err := strconv.ParseUint(idParam, 10, 32)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]string{"error": "invalid id format"})
+	}
+
 	var req TaskService.Task
 	if err := c.Bind(&req); err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]string{"error": "invalid request body"})
 	}
-	updated, err := h.service.UpdateTask(id, req)
+
+	updated, err := h.service.UpdateTask(uint(id), req)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "could not update task"})
 	}
@@ -54,9 +61,14 @@ func (h *TaskHandler) PatchHandler(c echo.Context) error {
 }
 
 func (h *TaskHandler) DeleteHandler(c echo.Context) error {
-	id := c.Param("id")
+	// Получаем ID из URL параметра
+	idParam := c.Param("id")
+	id, err := strconv.ParseUint(idParam, 10, 32)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]string{"error": "invalid id format"})
+	}
 
-	if err := h.service.DeleteTask(id); err != nil {
+	if err := h.service.DeleteTask(uint(id)); err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]string{"error": "Could not delete task"})
 	}
 	return c.JSON(http.StatusNoContent, nil)
