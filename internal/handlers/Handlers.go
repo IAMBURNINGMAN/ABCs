@@ -4,6 +4,7 @@ import (
 	"Basic/internal/TaskService"
 	"net/http"
 	"strconv"
+	"time"
 
 	"github.com/labstack/echo/v4"
 )
@@ -35,6 +36,9 @@ func (h *TaskHandler) PostHandler(c echo.Context) error {
 	}
 
 	created, err := h.service.CreateTask(req)
+	now := time.Now().UTC()
+	created.CreatedAt = now
+	created.UpdatedAt = now
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "could not create task"})
 	}
