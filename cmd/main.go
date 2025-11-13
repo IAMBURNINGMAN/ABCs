@@ -4,6 +4,7 @@ import (
 	"Basic/internal/TaskService"
 	"Basic/internal/db"
 	"Basic/internal/handlers"
+	"Basic/internal/web/tasks"
 	"log"
 
 	"github.com/labstack/echo/v4"
@@ -22,10 +23,8 @@ func main() {
 	e.Use(middleware.Logger())
 	e.Use(middleware.Recover())
 
-	e.GET("/tasks", TaskHandler.GetHandler)
-	e.POST("/tasks", TaskHandler.PostHandler)
-	e.PATCH("/tasks/:id", TaskHandler.PatchHandler)
-	e.DELETE("/tasks/:id", TaskHandler.DeleteHandler)
+	strictHandler := tasks.NewStrictHandler(TaskHandler, nil)
+	tasks.RegisterHandlers(e, strictHandler)
 
 	e.Logger.Fatal(e.Start(":8080"))
 }

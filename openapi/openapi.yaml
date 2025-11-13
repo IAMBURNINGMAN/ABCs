@@ -1,11 +1,13 @@
 openapi: 3.0.0
 info:
-  title: API
+  title: Task Management API
   version: 1.0.0
+
 paths:
   /tasks:
     get:
       summary: Get all tasks
+      operationId: getTasks
       tags:
         - tasks
       responses:
@@ -17,17 +19,18 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/Task'
+
     post:
       summary: Create a new task
+      operationId: createTask
       tags:
         - tasks
       requestBody:
-        description: The task to create
         required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Task'
+              $ref: '#/components/schemas/CreateTaskRequest'
       responses:
         '201':
           description: The created task
@@ -36,15 +39,89 @@ paths:
               schema:
                 $ref: '#/components/schemas/Task'
 
+  /tasks/{id}:
+    patch:
+      summary: Update a task
+      operationId: updateTask
+      tags:
+        - tasks
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateTaskRequest'
+      responses:
+        '200':
+          description: The updated task
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Task'
+
+    delete:
+      summary: Delete a task
+      operationId: deleteTask
+      tags:
+        - tasks
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '204':
+          description: Task deleted successfully
+
 components:
   schemas:
     Task:
       type: object
+      required:
+        - id
+        - title
+        - completed
+        - created_at
+        - updated_at
       properties:
         id:
           type: integer
-          format: uint # так как в БД айди это только положительные числа.
-        task:
+          format: int64
+        title:
           type: string
-        is_done:
-          type: bool
+        completed:
+          type: boolean
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+
+    CreateTaskRequest:
+      type: object
+      required:
+        - title
+      properties:
+        title:
+          type: string
+        completed:
+          type: boolean
+          default: false
+
+    UpdateTaskRequest:
+      type: object
+      properties:
+        title:
+          type: string
+        completed:
+          type: boolean
