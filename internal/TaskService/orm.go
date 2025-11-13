@@ -3,11 +3,11 @@ package TaskService
 import "time"
 
 type Task struct {
-	ID        uint      `gorm:"primaryKey;autoIncrement" json:"id"`
-	Title     string    `json:"title" gorm:"type:text;not null"`
-	Completed bool      `json:"completed" gorm:"not null;default:false"`
-	CreatedAt time.Time `json:"created_at" gorm:"autoCreateTime:nano"`
-	UpdatedAt time.Time `json:"updated_at" gorm:"autoUpdateTime:nano"`
+	ID        uint `gorm:"primaryKey"`
+	Title     string
+	Completed bool
+	CreatedAt time.Time `gorm:"autoCreateTime"`
+	UpdatedAt time.Time `gorm:"autoUpdateTime"`
 }
 
 func (Task) TableName() string {

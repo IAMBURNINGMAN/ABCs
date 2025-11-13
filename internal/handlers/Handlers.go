@@ -21,6 +21,8 @@ func (h *TaskHandler) GetTasks(ctx context.Context, request tasks.GetTasksReques
 			Id:        int64(tsk.ID),
 			Title:     tsk.Title,
 			Completed: tsk.Completed,
+			CreatedAt: tsk.CreatedAt,
+			UpdatedAt: tsk.UpdatedAt,
 		}
 		response = append(response, smtask)
 	}
@@ -41,7 +43,10 @@ func (h *TaskHandler) CreateTask(ctx context.Context, request tasks.CreateTaskRe
 		Id:        int64(createdtask.ID),
 		Title:     createdtask.Title,
 		Completed: createdtask.Completed,
+		CreatedAt: createdtask.CreatedAt,
+		UpdatedAt: createdtask.UpdatedAt,
 	}
+
 	return response, nil
 }
 

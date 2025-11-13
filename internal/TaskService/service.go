@@ -17,15 +17,17 @@ func NewTaskService(r TaskRepository) TaskService {
 }
 
 func (t *taskService) CreateTask(task Task) (Task, error) {
-	// ID будет сгенерирован автоматически базой данных (SERIAL)
 	newTask := Task{
 		Title:     task.Title,
 		Completed: task.Completed,
 	}
 
-	if err := t.repo.CreateTask(newTask); err != nil {
+	// Передаём указатель, чтобы GORM мог обновить поля
+	if err := t.repo.CreateTask(&newTask); err != nil {
 		return Task{}, err
 	}
+
+	// newTask теперь содержит ID, CreatedAt и UpdatedAt
 	return newTask, nil
 }
 
@@ -46,9 +48,10 @@ func (t *taskService) UpdateTask(taskId uint, task Task) (Task, error) {
 	existingTask.Title = task.Title
 	existingTask.Completed = task.Completed
 
-	if err := t.repo.UpdateTask(existingTask); err != nil {
+	if err := t.repo.UpdateTask(&existingTask); err != nil {
 		return Task{}, err
 	}
+
 	return existingTask, nil
 }
 
