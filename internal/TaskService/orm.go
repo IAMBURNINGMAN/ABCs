@@ -2,7 +2,7 @@ package TaskService
 
 import "time"
 
-type Task struct {
+type TaskStruct struct {
 	ID        uint `gorm:"primaryKey"`
 	Title     string
 	Completed bool
@@ -10,6 +10,6 @@ type Task struct {
 	UpdatedAt time.Time `gorm:"autoUpdateTime"`
 }
 
-func (Task) TableName() string {
+func (TaskStruct) TableName() string {
 	return "tasks"
 }

@@ -16,6 +16,9 @@ migrate:
 migrate-down:
 	$(MIGRATE) down
 
+test:
+	go test ./... -v
+
 gen:
 	oapi-codegen -config openapi/.openapi -include-tags tasks -package tasks openapi/openapi.yaml > ./internal/web/tasks/api.gen.go
 # для удобства добавим команду run, которая будет запускать наше приложение

@@ -3,10 +3,10 @@ package TaskService
 import "gorm.io/gorm"
 
 type TaskRepository interface {
-	CreateTask(task *Task) error
-	GetAllTasks() ([]Task, error)
-	GetTaskById(taskId uint) (Task, error)
-	UpdateTask(task *Task) error
+	CreateTask(task *TaskStruct) error
+	GetAllTasks() ([]TaskStruct, error)
+	GetTaskById(taskId uint) (TaskStruct, error)
+	UpdateTask(task *TaskStruct) error
 	DeleteTask(taskId uint) error
 }
 
@@ -18,28 +18,28 @@ func NewTaskRepository(db *gorm.DB) TaskRepository {
 	return &taskRepository{db: db}
 }
 
-func (r *taskRepository) CreateTask(task *Task) error {
+func (r *taskRepository) CreateTask(task *TaskStruct) error {
 	// GORM сам заполнит ID и CreatedAt / UpdatedAt
 	return r.db.Create(task).Error
 }
 
-func (r *taskRepository) GetAllTasks() ([]Task, error) {
-	var tasks []Task
+func (r *taskRepository) GetAllTasks() ([]TaskStruct, error) {
+	var tasks []TaskStruct
 	err := r.db.Find(&tasks).Error
 	return tasks, err
 }
 
-func (r *taskRepository) GetTaskById(taskId uint) (Task, error) {
-	var task Task
+func (r *taskRepository) GetTaskById(taskId uint) (TaskStruct, error) {
+	var task TaskStruct
 	err := r.db.First(&task, taskId).Error
 	return task, err
 }
 
-func (r *taskRepository) UpdateTask(task *Task) error {
+func (r *taskRepository) UpdateTask(task *TaskStruct) error {
 	// GORM обновит UpdatedAt автоматически
 	return r.db.Save(task).Error
 }
 
 func (r *taskRepository) DeleteTask(taskId uint) error {
-	return r.db.Delete(&Task{}, taskId).Error
+	return r.db.Delete(&TaskStruct{}, taskId).Error
 }

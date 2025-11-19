@@ -31,7 +31,7 @@ func (h *TaskHandler) GetTasks(ctx context.Context, request tasks.GetTasksReques
 
 func (h *TaskHandler) CreateTask(ctx context.Context, request tasks.CreateTaskRequestObject) (tasks.CreateTaskResponseObject, error) {
 	taskRequest := request.Body
-	tasktocreate := TaskService.Task{
+	tasktocreate := TaskService.TaskStruct{
 		Title:     taskRequest.Title,
 		Completed: *taskRequest.Completed,
 	}
