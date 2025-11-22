@@ -23,7 +23,7 @@ func main() {
 	TaskHandler := handlers.NewTaskHandler(TaskServicee)
 	UserRepo := UsersService.NewUserRepository(database)
 	UserService := UsersService.NewUserService(UserRepo)
-	UserHandler := handlers.NewUserHandler(UserService)
+	UserHandler := handlers.NewUserHandler(UserService, TaskServicee)
 	e := echo.New()
 	e.Use(middleware.Logger())
 	e.Use(middleware.Recover())

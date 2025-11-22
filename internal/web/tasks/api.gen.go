@@ -19,6 +19,7 @@ import (
 type CreateTaskRequest struct {
 	Completed *bool  `json:"completed,omitempty"`
 	Title     string `json:"title"`
+	UserId    int64  `json:"user_id"`
 }
 
 // Task defines model for Task.
@@ -28,6 +29,7 @@ type Task struct {
 	Id        int64     `json:"id"`
 	Title     string    `json:"title"`
 	UpdatedAt time.Time `json:"updated_at"`
+	UserId    int64     `json:"user_id"`
 }
 
 // UpdateTaskRequest defines model for UpdateTaskRequest.

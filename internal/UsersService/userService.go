@@ -36,8 +36,12 @@ func (u userService) UpdateUser(id uint, user UserStruct) (UserStruct, error) {
 	if err != nil {
 		return UserStruct{}, err
 	}
-	existingUser.Email = user.Email
-	existingUser.Password = user.Password
+	if user.Email != "" {
+		existingUser.Email = user.Email
+	}
+	if user.Password != "" {
+		existingUser.Password = user.Password
+	}
 	if err := u.repo.UpdateUser(&existingUser); err != nil {
 		return UserStruct{}, err
 	}

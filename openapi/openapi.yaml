@@ -3,7 +3,6 @@ info:
   title: Task Management API
   version: 1.0.0
 
-
 paths:
   /users:
     get:
@@ -30,7 +29,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/User'
+              $ref: '#/components/schemas/CreateUserRequest'
       responses:
         '201':
           description: The created user
@@ -38,9 +37,10 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/User'
+
   /users/{id}:
     patch:
-      summary: Path a user data by id
+      summary: Update a user data by id
       operationId: PatchUser
       tags:
         - users
@@ -56,7 +56,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/User'
+              $ref: '#/components/schemas/UpdateUserRequest'
       responses:
         '200':
           description: The updated user
@@ -79,7 +79,30 @@ paths:
             format: int64
       responses:
         '204':
-          description: Task deleted successfully
+          description: User deleted successfully
+
+  /users/{id}/tasks:
+    get:
+      summary: Get all tasks for a specific user
+      operationId: GetTasksByUserId
+      tags:
+        - users
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: A list of tasks for the user
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Task'
 
   /tasks:
     get:
@@ -188,12 +211,32 @@ components:
           type: string
           format: date-time
 
+    CreateUserRequest:
+      type: object
+      required:
+        - email
+        - password
+      properties:
+        email:
+          type: string
+        password:
+          type: string
+
+    UpdateUserRequest:
+      type: object
+      properties:
+        email:
+          type: string
+        password:
+          type: string
+
     Task:
       type: object
       required:
         - id
         - title
         - completed
+        - user_id
         - created_at
         - updated_at
       properties:
@@ -204,6 +247,9 @@ components:
           type: string
         completed:
           type: boolean
+        user_id:
+          type: integer
+          format: int64
         created_at:
           type: string
           format: date-time
@@ -215,9 +261,13 @@ components:
       type: object
       required:
         - title
+        - user_id
       properties:
         title:
           type: string
+        user_id:
+          type: integer
+          format: int64
         completed:
           type: boolean
           default: false

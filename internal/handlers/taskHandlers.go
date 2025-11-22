@@ -4,6 +4,7 @@ import (
 	"Basic/internal/TaskService"
 	"Basic/internal/web/tasks"
 	"context"
+	"errors"
 )
 
 type TaskHandler struct {
@@ -21,6 +22,7 @@ func (h *TaskHandler) GetTasks(ctx context.Context, request tasks.GetTasksReques
 			Id:        int64(tsk.ID),
 			Title:     tsk.Title,
 			Completed: tsk.Completed,
+			UserId:    int64(tsk.UserID),
 			CreatedAt: tsk.CreatedAt,
 			UpdatedAt: tsk.UpdatedAt,
 		}
@@ -31,9 +33,17 @@ func (h *TaskHandler) GetTasks(ctx context.Context, request tasks.GetTasksReques
 
 func (h *TaskHandler) CreateTask(ctx context.Context, request tasks.CreateTaskRequestObject) (tasks.CreateTaskResponseObject, error) {
 	taskRequest := request.Body
+	if taskRequest.UserId == 0 {
+		return nil, errors.New("UserId is required")
+	}
+	complited := false
+	if taskRequest.Completed != nil {
+		complited = *taskRequest.Completed
+	}
 	tasktocreate := TaskService.TaskStruct{
 		Title:     taskRequest.Title,
-		Completed: *taskRequest.Completed,
+		Completed: complited,
+		UserID:    uint(taskRequest.UserId),
 	}
 	createdtask, err := h.service.CreateTask(tasktocreate)
 	if err != nil {
@@ -43,6 +53,7 @@ func (h *TaskHandler) CreateTask(ctx context.Context, request tasks.CreateTaskRe
 		Id:        int64(createdtask.ID),
 		Title:     createdtask.Title,
 		Completed: createdtask.Completed,
+		UserId:    int64(createdtask.UserID),
 		CreatedAt: createdtask.CreatedAt,
 		UpdatedAt: createdtask.UpdatedAt,
 	}
@@ -63,11 +74,15 @@ func (h *TaskHandler) DeleteTask(ctx context.Context, request tasks.DeleteTaskRe
 func (h *TaskHandler) UpdateTask(ctx context.Context, request tasks.UpdateTaskRequestObject) (tasks.UpdateTaskResponseObject, error) {
 	id := uint(request.Id)
 
-	// request.Body содержит поля для обновления
 	updateinfo := request.Body
 
-	// Получаем текущую задачу из БД
 	tasktoupdate, err := h.service.GetTaskById(id)
+	if updateinfo.Title != nil {
+		tasktoupdate.Title = *updateinfo.Title
+	}
+	if updateinfo.Completed != nil {
+		tasktoupdate.Completed = *updateinfo.Completed
+	}
 	if err != nil {
 		return nil, err
 	}
@@ -87,6 +102,7 @@ func (h *TaskHandler) UpdateTask(ctx context.Context, request tasks.UpdateTaskRe
 		Id:        int64(updatedTask.ID),
 		Title:     updatedTask.Title,
 		Completed: updatedTask.Completed,
+		UserId:    int64(updatedTask.UserID),
 		CreatedAt: updatedTask.CreatedAt,
 		UpdatedAt: updatedTask.UpdatedAt,
 	}

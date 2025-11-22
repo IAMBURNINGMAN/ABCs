@@ -6,6 +6,11 @@ type MockTaskRepository struct {
 	mock.Mock
 }
 
+func (m *MockTaskRepository) GetTasksByUserId(userId uint) ([]TaskStruct, error) {
+	//TODO implement me
+	panic("implement me")
+}
+
 func (m *MockTaskRepository) CreateTask(task *TaskStruct) error {
 	args := m.Called(task)
 	return args.Error(0)

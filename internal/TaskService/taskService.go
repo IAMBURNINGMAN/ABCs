@@ -4,12 +4,17 @@ type TaskService interface {
 	CreateTask(task TaskStruct) (TaskStruct, error)
 	GetAllTasks() ([]TaskStruct, error)
 	GetTaskById(taskId uint) (TaskStruct, error)
+	GetAllTasksByUser(userId uint) ([]TaskStruct, error)
 	UpdateTask(taskId uint, task TaskStruct) (TaskStruct, error)
 	DeleteTask(taskId uint) error
 }
 
 type taskService struct {
 	repo TaskRepository
+}
+
+func (t *taskService) GetAllTasksByUser(userId uint) ([]TaskStruct, error) {
+	return t.repo.GetTasksByUserId(userId)
 }
 
 func NewTaskService(r TaskRepository) TaskService {

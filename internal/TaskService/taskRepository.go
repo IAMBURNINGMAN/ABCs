@@ -6,12 +6,19 @@ type TaskRepository interface {
 	CreateTask(task *TaskStruct) error
 	GetAllTasks() ([]TaskStruct, error)
 	GetTaskById(taskId uint) (TaskStruct, error)
+	GetTasksByUserId(userId uint) ([]TaskStruct, error)
 	UpdateTask(task *TaskStruct) error
 	DeleteTask(taskId uint) error
 }
 
 type taskRepository struct {
 	db *gorm.DB
+}
+
+func (r *taskRepository) GetTasksByUserId(userId uint) ([]TaskStruct, error) {
+	var tasks []TaskStruct
+	err := r.db.Where("user_id = ?", userId).Find(&tasks).Error
+	return tasks, err
 }
 
 func NewTaskRepository(db *gorm.DB) TaskRepository {
