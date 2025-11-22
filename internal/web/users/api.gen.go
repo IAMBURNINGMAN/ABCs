@@ -40,7 +40,6 @@ type UpdateUserRequest struct {
 // User defines model for User.
 type User struct {
 	CreatedAt time.Time `json:"created_at"`
-	DeletedAt time.Time `json:"deleted_at"`
 	Email     string    `json:"email"`
 	Id        int64     `json:"id"`
 	Password  string    `json:"password"`

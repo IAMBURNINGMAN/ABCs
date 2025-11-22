@@ -5,7 +5,6 @@ import (
 	"Basic/internal/UsersService"
 	"Basic/internal/web/users"
 	"context"
-	"time"
 )
 
 type UserHandler struct {
@@ -20,15 +19,11 @@ func (u UserHandler) GetUser(ctx context.Context, request users.GetUserRequestOb
 	}
 	response := users.GetUser200JSONResponse{}
 	for _, usr := range allusers {
-		var deletedAt time.Time
-		deletedAt = usr.DeletedAt
-
 		smuser := users.User{
 			Id:        int64(usr.ID),
 			Email:     usr.Email,
 			Password:  usr.Password,
 			CreatedAt: usr.CreatedAt,
-			DeletedAt: deletedAt, // ✅ Безопасно
 			UpdatedAt: usr.UpdatedAt,
 		}
 		response = append(response, smuser)
@@ -49,7 +44,7 @@ func (u UserHandler) PostUser(ctx context.Context, request users.PostUserRequest
 	response := users.PostUser201JSONResponse{
 		Id:        int64(createduser.ID),
 		Email:     createduser.Email,
-		Password:  createduser.Password, // Показываем пароль
+		Password:  createduser.Password,
 		CreatedAt: createduser.CreatedAt,
 		UpdatedAt: createduser.UpdatedAt,
 	}

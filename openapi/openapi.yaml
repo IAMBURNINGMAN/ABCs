@@ -191,7 +191,6 @@ components:
         - email
         - password
         - created_at
-        - deleted_at
         - updated_at
       properties:
         id:
@@ -202,9 +201,6 @@ components:
         password:
           type: string
         created_at:
-          type: string
-          format: date-time
-        deleted_at:
           type: string
           format: date-time
         updated_at:

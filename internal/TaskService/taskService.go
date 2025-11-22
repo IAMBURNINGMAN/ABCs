@@ -51,11 +51,9 @@ func (t *taskService) UpdateTask(taskId uint, task TaskStruct) (TaskStruct, erro
 		return TaskStruct{}, err
 	}
 
-	existingTask = TaskStruct{
-		Title:     task.Title,
-		Completed: task.Completed,
-		UserID:    task.UserID, // ✅ Добавить!
-	}
+	existingTask.Title = task.Title
+	existingTask.Completed = task.Completed
+
 	if err := t.repo.UpdateTask(&existingTask); err != nil {
 		return TaskStruct{}, err
 	}
