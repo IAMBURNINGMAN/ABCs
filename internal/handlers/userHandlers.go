@@ -5,6 +5,7 @@ import (
 	"Basic/internal/UsersService"
 	"Basic/internal/web/users"
 	"context"
+	"time"
 )
 
 type UserHandler struct {
@@ -19,12 +20,15 @@ func (u UserHandler) GetUser(ctx context.Context, request users.GetUserRequestOb
 	}
 	response := users.GetUser200JSONResponse{}
 	for _, usr := range allusers {
+		var deletedAt time.Time
+		deletedAt = usr.DeletedAt
+
 		smuser := users.User{
 			Id:        int64(usr.ID),
 			Email:     usr.Email,
 			Password:  usr.Password,
 			CreatedAt: usr.CreatedAt,
-			DeletedAt: *usr.DeletedAt, // Без проверок
+			DeletedAt: deletedAt, // ✅ Безопасно
 			UpdatedAt: usr.UpdatedAt,
 		}
 		response = append(response, smuser)
@@ -35,7 +39,7 @@ func (u UserHandler) GetUser(ctx context.Context, request users.GetUserRequestOb
 func (u UserHandler) PostUser(ctx context.Context, request users.PostUserRequestObject) (users.PostUserResponseObject, error) {
 	userRequest := request.Body
 	usertocreate := UsersService.UserStruct{
-		Email:    string(userRequest.Email),
+		Email:    userRequest.Email,
 		Password: userRequest.Password,
 	}
 	createduser, err := u.service.CreateUser(usertocreate)
@@ -67,9 +71,13 @@ func (u UserHandler) PatchUser(ctx context.Context, request users.PatchUserReque
 	id := uint(request.Id)
 	updateinfo := request.Body
 
-	usertoupdate := UsersService.UserStruct{
-		Email:    *updateinfo.Email,
-		Password: *updateinfo.Password,
+	usertoupdate := UsersService.UserStruct{}
+
+	if updateinfo.Email != nil {
+		usertoupdate.Email = *updateinfo.Email
+	}
+	if updateinfo.Password != nil {
+		usertoupdate.Password = *updateinfo.Password
 	}
 
 	updatedUser, err := u.service.UpdateUser(id, usertoupdate)

@@ -16,13 +16,14 @@ func (h *TaskHandler) GetTasks(ctx context.Context, request tasks.GetTasksReques
 	if err != nil {
 		return nil, err
 	}
+
 	response := tasks.GetTasks200JSONResponse{}
 	for _, tsk := range alltasks {
 		smtask := tasks.Task{
 			Id:        int64(tsk.ID),
 			Title:     tsk.Title,
 			Completed: tsk.Completed,
-			UserId:    int64(tsk.UserID),
+			UserId:    int64(tsk.UserID), // Добавлено
 			CreatedAt: tsk.CreatedAt,
 			UpdatedAt: tsk.UpdatedAt,
 		}
@@ -33,27 +34,34 @@ func (h *TaskHandler) GetTasks(ctx context.Context, request tasks.GetTasksReques
 
 func (h *TaskHandler) CreateTask(ctx context.Context, request tasks.CreateTaskRequestObject) (tasks.CreateTaskResponseObject, error) {
 	taskRequest := request.Body
+
+	// Валидация: user_id обязателен
 	if taskRequest.UserId == 0 {
-		return nil, errors.New("UserId is required")
+		return nil, errors.New("user_id is required")
 	}
-	complited := false
+
+	// Устанавливаем значение по умолчанию для completed, если не передано
+	completed := false
 	if taskRequest.Completed != nil {
-		complited = *taskRequest.Completed
+		completed = *taskRequest.Completed
 	}
+
 	tasktocreate := TaskService.TaskStruct{
 		Title:     taskRequest.Title,
-		Completed: complited,
-		UserID:    uint(taskRequest.UserId),
+		Completed: completed,
+		UserID:    uint(taskRequest.UserId), // Добавлено
 	}
+
 	createdtask, err := h.service.CreateTask(tasktocreate)
 	if err != nil {
 		return nil, err
 	}
+
 	response := tasks.CreateTask201JSONResponse{
 		Id:        int64(createdtask.ID),
 		Title:     createdtask.Title,
 		Completed: createdtask.Completed,
-		UserId:    int64(createdtask.UserID),
+		UserId:    int64(createdtask.UserID), // Добавлено
 		CreatedAt: createdtask.CreatedAt,
 		UpdatedAt: createdtask.UpdatedAt,
 	}
@@ -73,36 +81,32 @@ func (h *TaskHandler) DeleteTask(ctx context.Context, request tasks.DeleteTaskRe
 
 func (h *TaskHandler) UpdateTask(ctx context.Context, request tasks.UpdateTaskRequestObject) (tasks.UpdateTaskResponseObject, error) {
 	id := uint(request.Id)
-
 	updateinfo := request.Body
 
 	tasktoupdate, err := h.service.GetTaskById(id)
+	if err != nil {
+		return nil, err
+	}
+
+	// Обновляем только переданные поля
 	if updateinfo.Title != nil {
 		tasktoupdate.Title = *updateinfo.Title
 	}
 	if updateinfo.Completed != nil {
 		tasktoupdate.Completed = *updateinfo.Completed
 	}
-	if err != nil {
-		return nil, err
-	}
-	if updateinfo.Title != nil {
-		tasktoupdate.Title = *updateinfo.Title // разыменовываем указатель
-	}
-	if updateinfo.Completed != nil {
-		tasktoupdate.Completed = *updateinfo.Completed
-	}
+	// UserID не обновляем
 
-	// Сохраняем обновленную задачу
 	updatedTask, err := h.service.UpdateTask(id, tasktoupdate)
 	if err != nil {
 		return nil, err
 	}
+
 	response := tasks.UpdateTask200JSONResponse{
 		Id:        int64(updatedTask.ID),
 		Title:     updatedTask.Title,
 		Completed: updatedTask.Completed,
-		UserId:    int64(updatedTask.UserID),
+		UserId:    int64(updatedTask.UserID), // Добавлено
 		CreatedAt: updatedTask.CreatedAt,
 		UpdatedAt: updatedTask.UpdatedAt,
 	}

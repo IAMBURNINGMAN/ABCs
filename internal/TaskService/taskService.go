@@ -25,6 +25,7 @@ func (t *taskService) CreateTask(task TaskStruct) (TaskStruct, error) {
 	newTask := TaskStruct{
 		Title:     task.Title,
 		Completed: task.Completed,
+		UserID:    task.UserID,
 	}
 
 	// Передаём указатель, чтобы GORM мог обновить поля
@@ -50,9 +51,11 @@ func (t *taskService) UpdateTask(taskId uint, task TaskStruct) (TaskStruct, erro
 		return TaskStruct{}, err
 	}
 
-	existingTask.Title = task.Title
-	existingTask.Completed = task.Completed
-
+	existingTask = TaskStruct{
+		Title:     task.Title,
+		Completed: task.Completed,
+		UserID:    task.UserID, // ✅ Добавить!
+	}
 	if err := t.repo.UpdateTask(&existingTask); err != nil {
 		return TaskStruct{}, err
 	}
